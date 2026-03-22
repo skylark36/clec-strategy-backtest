@@ -121,6 +121,21 @@ const MainApp = () => {
     return saved !== null ? saved === 'true' : true
   })
 
+  // Clear results if market data has changed (cache busting)
+  useEffect(() => {
+    const lastDataDate = MARKET_DATA[MARKET_DATA.length - 1].date
+    const savedLastDate = localStorage.getItem('app_last_market_date')
+    const savedVersion = localStorage.getItem('app_version')
+
+    if (savedLastDate !== lastDataDate || savedVersion !== version) {
+      localStorage.removeItem('app_profiles') // Force reset to initial profiles
+      localStorage.setItem('app_last_market_date', lastDataDate)
+      localStorage.setItem('app_version', version)
+      // Optional: Refresh page to clear all states if needed
+      // window.location.reload();
+    }
+  }, [])
+
   // Auto-collapse on small screens initially
   useEffect(() => {
     if (window.innerWidth < 1024) {
@@ -359,7 +374,10 @@ const MainApp = () => {
             />
 
             <div className="mt-8 px-2 text-xs text-slate-400 leading-relaxed hidden lg:block">
-              <p>{t('dataRange')}: 2000 - 2025</p>
+              <p>
+                {t('dataRange')}: {MARKET_DATA[0].date.substring(0, 4)} -{' '}
+                {MARKET_DATA[MARKET_DATA.length - 1].date.substring(0, 4)}
+              </p>
               <p className="mt-2">{t('appDesc')}</p>
             </div>
           </div>
